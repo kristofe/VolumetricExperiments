@@ -6,8 +6,11 @@
 //  Copyright (c) 2013 Kristofer Schlachter. All rights reserved.
 //
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 #include "GLFW/glfw3.h" // - lib is in /usr/local/lib/libglfw3.a
+#include "test.h"
 
 void hintOpenGL32CoreProfile(){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -28,8 +31,6 @@ void sizeViewport(GLFWwindow* window){
   glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 }
 
-#include <stdlib.h>
-#include <stdio.h>
 static void error_callback(int error, const char* description)
 {
   fputs(description, stderr);
@@ -41,6 +42,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 int main(void)
 {
+   test();
   GLFWwindow* window;
   glfwSetErrorCallback(error_callback);
   if (!glfwInit())
