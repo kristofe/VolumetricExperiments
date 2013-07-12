@@ -11,6 +11,27 @@
 #include <iostream>
 #include "GLFW/glfw3.h" // - lib is in /usr/local/lib/libglfw3.a
 #include "test.h"
+#include "glutil.h"
+
+
+//TODO: Move this kind of stuff into a renderer
+typedef struct {
+   GLfloat x, y, z, r, g, b;
+} Triangle;
+
+Triangle triangle[3] = {
+   {-0.6f, -0.4f, 0.f, 1.f, 0.f, 0.f},
+   {0.6f, -0.4f, 0.f,0.f, 1.f, 0.f},
+   {0.f, 0.6f, 0.f,0.f, 0.f, 1.f}
+};
+
+GLubyte indices[3] = {
+    0, 1, 2
+};
+
+GLuint vboVerts;
+GLuint vboIndices;
+/////
 
 void hintOpenGL32CoreProfile(){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -41,7 +62,42 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+void setupVBO()
+{
+   glGenBuffers(1,&vboVerts);
+   glBindBuffer(GL_ARRAY_BUFFER, vboVerts);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(triangle),&triangle[0].x,GL_STATIC_DRAW);
 
+
+   glGenBuffers(1, &vboIndices);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+
+   kdslib::GLUtil::checkGLErrors();
+}
+
+void drawVBO() {
+    //glEnableVertexAttribArray(positionSlot);
+    //glEnableVertexAttribArray(uvSlot);
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, vboVerts);
+
+    //glUniformMatrix4fv(projectionUniformSlot, 1, 0, projectionMatrix);
+    //glUniformMatrix4fv(modelViewUniformSlot, 1, 0, modelviewMatrix);
+    //glVertexAttribPointer(positionSlot, 2, GL_FLOAT, GL_FALSE, sizeof(V2fT2f),  BUFFER_OFFSET(0));
+    //glVertexAttribPointer(uvSlot, 2, GL_FLOAT, GL_FALSE, sizeof(V2fT2f),  BUFFER_OFFSET(sizeof(float)*2));
+
+
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
+    glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_BYTE, 0);
+
+    //glDisableVertexAttribArray(positionSlot);
+    //glDisableVertexAttribArray(uvSlot);
+    kdslib::GLUtil::checkGLErrors();
+
+}
 int main(void)
 {
   test();
@@ -59,6 +115,9 @@ int main(void)
   }
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
+
+  std::cout << kdslib::GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
+  setupVBO();
   while (!glfwWindowShouldClose(window))
   {
     sizeViewport(window);
@@ -66,6 +125,10 @@ int main(void)
     glLoadIdentity();
     //TODO: MAKE THIS OPENGL 3.2 Compatible
     glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
+
+    //TODO: DO full opengl 3.2 with shaders
+    //drawVBO();
+
     glBegin(GL_TRIANGLES);
     glColor3f(1.f, 0.f, 0.f);
     glVertex3f(-0.6f, -0.4f, 0.f);
@@ -74,6 +137,8 @@ int main(void)
     glColor3f(0.f, 0.f, 1.f);
     glVertex3f(0.f, 0.6f, 0.f);
     glEnd();
+
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
