@@ -40,15 +40,17 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
+
+
 int main(void)
 {
-   test();
+  test();
   GLFWwindow* window;
   glfwSetErrorCallback(error_callback);
   if (!glfwInit())
     exit(EXIT_FAILURE);
   
-  hintOpenGL32CoreProfile();
+  //hintOpenGL32CoreProfile();
   window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
   if (!window)
   {

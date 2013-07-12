@@ -1,8 +1,16 @@
 cmake_minimum_required  (VERSION 2.6)
 project(VolumetricExperiments)
 
+set(SOURCES
+   main.cpp
+)
+
+set(HEADERS
+
+)
 
 #set(KDSLIBFILE_PATH "libKDSLib.a" CACHE FILEPATH "Where is KDSLib?")
+
 
 set(KDSLIB_PATH "/Users/kristofe/Documents/Projects/KDSLib/")
 set(KDSLIB_BUILD_PATH ${KDSLIB_PATH}build)
@@ -10,7 +18,7 @@ set(KDSLIB_INCLUDE_PATH ${KDSLIB_PATH}include)
 
 #message(${KDSLIBBUILD_PATH})
 
-add_subdirectory(${KDSLIB_PATH} ${KDSLIB_BUILD_PATH})
+#add_subdirectory(${KDSLIB_PATH} ${KDSLIB_BUILD_PATH})
 include_directories(${KDSLIB_INCLUDE_PATH})
 link_directories(${KDSLIB_BUILD_PATH})
 
@@ -25,5 +33,7 @@ if(APPLE)
    SET(EXTRA_LIBS ${IOKIT_LIBRARY} ${COCOA_LIBRARY} ${OPENGL_LIBRARY} libKDSLib.a libglfw3.a )
 ENDIF(APPLE)
 
-add_executable(Volumetric main.cpp)
+
+
+add_executable(Volumetric ${SOURCES} ${HEADERS})
 target_link_libraries(Volumetric ${EXTRA_LIBS})
