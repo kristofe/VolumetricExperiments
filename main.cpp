@@ -52,8 +52,11 @@ void sizeViewport(GLFWwindow* window){
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+  glm::mat4 ortho = glm::ortho(-ratio,ratio, -1.0f, 1.0f, 1.0f, -1.0f);
+  glLoadMatrixf(&ortho[0][0]);
+
+  //glLoadIdentity();
+  //glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 }
 
 static void error_callback(int error, const char* description)
