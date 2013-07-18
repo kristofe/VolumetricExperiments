@@ -15,11 +15,12 @@ set(HEADERS
 set(KDSLIB_PATH "/Users/kristofe/Documents/Projects/KDSLib/")
 set(KDSLIB_BUILD_PATH ${KDSLIB_PATH}build)
 set(KDSLIB_INCLUDE_PATH ${KDSLIB_PATH}include)
+set(GLM_INCLUDE_PATH ${KDSLIB_PATH})
 
 #message(${KDSLIBBUILD_PATH})
 
 #add_subdirectory(${KDSLIB_PATH} ${KDSLIB_BUILD_PATH})
-include_directories(${KDSLIB_INCLUDE_PATH})
+include_directories(${KDSLIB_INCLUDE_PATH} ${GLM_INCLUDE_PATH})
 link_directories(${KDSLIB_BUILD_PATH})
 
 if(APPLE)

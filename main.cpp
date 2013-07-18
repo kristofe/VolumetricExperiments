@@ -12,7 +12,10 @@
 #include "GLFW/glfw3.h" // - lib is in /usr/local/lib/libglfw3.a
 #include "test.h"
 #include "glutil.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
+using namespace kdslib;
 
 //TODO: Move this kind of stuff into a renderer
 typedef struct {
@@ -31,6 +34,7 @@ GLubyte indices[3] = {
 
 GLuint vboVerts;
 GLuint vboIndices;
+GLint  shaderProgram1;
 /////
 
 void hintOpenGL32CoreProfile(){
@@ -62,6 +66,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+void loadAndLinkShaders(){
+      shaderProgram1 = GLUtil::loadShaders("../vertShader.glsl","../fragShader.glsl","");
+}
+
 void setupVBO()
 {
    glGenBuffers(1,&vboVerts);
@@ -73,7 +81,7 @@ void setupVBO()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
 
-   kdslib::GLUtil::checkGLErrors();
+   GLUtil::checkGLErrors();
 }
 
 void drawVBO() {
@@ -95,7 +103,7 @@ void drawVBO() {
 
     //glDisableVertexAttribArray(positionSlot);
     //glDisableVertexAttribArray(uvSlot);
-    kdslib::GLUtil::checkGLErrors();
+    GLUtil::checkGLErrors();
 
 }
 int main(void)
@@ -116,15 +124,19 @@ int main(void)
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
 
-  std::cout << kdslib::GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
+  std::cout << GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
+  loadAndLinkShaders();
   setupVBO();
+  glm::mat4 identityMatrix = glm::mat4(1.0);//Identity matrix
+
   while (!glfwWindowShouldClose(window))
   {
     sizeViewport(window);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     //TODO: MAKE THIS OPENGL 3.2 Compatible
-    glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
+    glm::mat4 rotMat = glm::rotate(identityMatrix,(float) glfwGetTime() * 50.f,
+                                   glm::vec3(0.f,0.f,1.f));
+    glLoadMatrixf(&rotMat[0][0]);
 
     //TODO: DO full opengl 3.2 with shaders
     //drawVBO();
