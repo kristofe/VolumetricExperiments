@@ -5,7 +5,7 @@
 //  Created by Kristofer Schlachter on 7/8/13.
 //  Copyright (c) 2013 Kristofer Schlachter. All rights reserved.
 //
-
+#define GLFW_INCLUDE_GLCOREARB
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -32,9 +32,10 @@ GLubyte indices[3] = {
     0, 1, 2
 };
 
-GLuint vboVerts;
-GLuint vboIndices;
-GLint  shaderProgram1;
+GLuint gVAO = 0;
+GLuint gVBO = 0;
+GLint  shaderProgram1 = 0;
+GLint  vertSlot = 0;
 /////
 
 void hintOpenGL32CoreProfile(){
@@ -51,9 +52,9 @@ void sizeViewport(GLFWwindow* window){
   ratio = width / (float) height;
   glViewport(0, 0, width, height);
   glClear(GL_COLOR_BUFFER_BIT);
-  glMatrixMode(GL_PROJECTION);
+  //glMatrixMode(GL_PROJECTION);
   glm::mat4 ortho = glm::ortho(-ratio,ratio, -1.0f, 1.0f, 1.0f, -1.0f);
-  glLoadMatrixf(&ortho[0][0]);
+  //glLoadMatrixf(&ortho[0][0]);
 
   //glLoadIdentity();
   //glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
@@ -73,42 +74,56 @@ void loadAndLinkShaders(){
       shaderProgram1 = GLUtil::loadShaders("../vertShader.glsl","../fragShader.glsl","");
 }
 
-void setupVBO()
+
+void loadTriangle()
 {
-   glGenBuffers(1,&vboVerts);
-   glBindBuffer(GL_ARRAY_BUFFER, vboVerts);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(triangle),&triangle[0].x,GL_STATIC_DRAW);
+   // make and bind the VAO
+   glGenVertexArrays(1, &gVAO);
+   glBindVertexArray(gVAO);
 
+   // make and bind the VBO
+   glGenBuffers(1, &gVBO);
+   glBindBuffer(GL_ARRAY_BUFFER, gVBO);
 
-   glGenBuffers(1, &vboIndices);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices[0], GL_STATIC_DRAW);
+   // Put the three triangle verticies into the VBO
+   GLfloat vertexData[] = {
+      //  X     Y     Z
+      0.0f, 0.8f, 0.0f,
+      -0.8f,-0.8f, 0.0f,
+      0.8f,-0.8f, 0.0f,
+   };
+   glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+   // connect the xyz to the "vert" attribute of the vertex shader
+   GLint vertSlot = glGetAttribLocation(shaderProgram1,"vert");
+   glEnableVertexAttribArray(vertSlot);
+   glVertexAttribPointer(vertSlot, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+   // unbind the VBO and VAO
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindVertexArray(0);
 
    GLUtil::checkGLErrors();
 }
 
-void drawVBO() {
-    //glEnableVertexAttribArray(positionSlot);
-    //glEnableVertexAttribArray(uvSlot);
+void drawTriangle()
+{
+   // bind the program (the shaders)
+    glUseProgram(shaderProgram1);
 
+    // bind the VAO (the triangle)
+    glBindVertexArray(gVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vboVerts);
+    // draw the VAO
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    //glUniformMatrix4fv(projectionUniformSlot, 1, 0, projectionMatrix);
-    //glUniformMatrix4fv(modelViewUniformSlot, 1, 0, modelviewMatrix);
-    //glVertexAttribPointer(positionSlot, 2, GL_FLOAT, GL_FALSE, sizeof(V2fT2f),  BUFFER_OFFSET(0));
-    //glVertexAttribPointer(uvSlot, 2, GL_FLOAT, GL_FALSE, sizeof(V2fT2f),  BUFFER_OFFSET(sizeof(float)*2));
+    // unbind the VAO
+    glBindVertexArray(0);
 
-
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIndices);
-    glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_BYTE, 0);
-
-    //glDisableVertexAttribArray(positionSlot);
-    //glDisableVertexAttribArray(uvSlot);
-    GLUtil::checkGLErrors();
-
+    // unbind the program
+    glUseProgram(0);
 }
+
 int main(void)
 {
   test();
@@ -117,7 +132,7 @@ int main(void)
   if (!glfwInit())
     exit(EXIT_FAILURE);
   
-  //hintOpenGL32CoreProfile();
+  hintOpenGL32CoreProfile();
   window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
   if (!window)
   {
@@ -129,30 +144,19 @@ int main(void)
 
   std::cout << GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
   loadAndLinkShaders();
-  setupVBO();
+  loadTriangle();
+
   glm::mat4 identityMatrix = glm::mat4(1.0);//Identity matrix
 
   while (!glfwWindowShouldClose(window))
   {
     sizeViewport(window);
-    glMatrixMode(GL_MODELVIEW);
-    //TODO: MAKE THIS OPENGL 3.2 Compatible
+    //glMatrixMode(GL_MODELVIEW);
     glm::mat4 rotMat = glm::rotate(identityMatrix,(float) glfwGetTime() * 50.f,
                                    glm::vec3(0.f,0.f,1.f));
-    glLoadMatrixf(&rotMat[0][0]);
+    //glLoadMatrixf(&rotMat[0][0]);
 
-    //TODO: DO full opengl 3.2 with shaders
-    //drawVBO();
-
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.f, 0.f, 0.f);
-    glVertex3f(-0.6f, -0.4f, 0.f);
-    glColor3f(0.f, 1.f, 0.f);
-    glVertex3f(0.6f, -0.4f, 0.f);
-    glColor3f(0.f, 0.f, 1.f);
-    glVertex3f(0.f, 0.6f, 0.f);
-    glEnd();
-
+    drawTriangle();
 
     glfwSwapBuffers(window);
     glfwPollEvents();
