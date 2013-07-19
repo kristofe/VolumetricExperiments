@@ -17,6 +17,9 @@
 
 using namespace kdslib;
 
+#define BUFFER_OFFSET(i) ((void*)(i))
+
+
 //TODO: Move this kind of stuff into a renderer
 typedef struct {
    GLfloat x, y, z, r, g, b;
@@ -36,6 +39,9 @@ GLuint gVAO = 0;
 GLuint gVBO = 0;
 GLint  shaderProgram1 = 0;
 GLint  vertSlot = 0;
+GLint  colorSlot = 0;
+GLint  modelViewSlot = 0;
+
 /////
 
 void hintOpenGL32CoreProfile(){
@@ -88,40 +94,69 @@ void loadTriangle()
    // Put the three triangle verticies into the VBO
    GLfloat vertexData[] = {
       //  X     Y     Z
-      0.0f, 0.8f, 0.0f,
-      -0.8f,-0.8f, 0.0f,
-      0.8f,-0.8f, 0.0f,
+      0.0f, 0.8f, 0.0f,1.0,0.0,0.0,
+      -0.8f,-0.8f, 0.0f,0.0,1.0,0.0,
+      0.8f,-0.8f, 0.0f,0.0,0.0,1.0
    };
-   glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
    // connect the xyz to the "vert" attribute of the vertex shader
-   GLint vertSlot = glGetAttribLocation(shaderProgram1,"vert");
+   vertSlot = glGetAttribLocation(shaderProgram1,"vert");
    glEnableVertexAttribArray(vertSlot);
-   glVertexAttribPointer(vertSlot, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+   glVertexAttribPointer(vertSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Triangle),
+                         BUFFER_OFFSET(0));
 
-   // unbind the VBO and VAO
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindVertexArray(0);
+   std::cout << "Setup Vert Slot = " << vertSlot << std::endl; std::cout.flush();
+   GLUtil::checkGLErrors();
+
+   colorSlot = glGetAttribLocation(shaderProgram1,"color");
+   std::cout << "Color Slot = " << colorSlot << std::endl; std::cout.flush();
+   glEnableVertexAttribArray(colorSlot);
+   glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Triangle),
+                         BUFFER_OFFSET(sizeof(GLfloat)*3));
+
+   std::cout << "Setup Color Slot = " << colorSlot << std::endl; std::cout.flush();
+   GLUtil::checkGLErrors();
+
+
+   modelViewSlot = glGetUniformLocation(shaderProgram1, "modelview");
+   std::cout << "Setup modelViewl Uniform Slot = " << modelViewSlot << std::endl; std::cout.flush();
+   std::cout << "Done setting up triangle" << std::endl; std::cout.flush();
+
+   glDisableVertexAttribArray(vertSlot);
+   glDisableVertexAttribArray(colorSlot);
 
    GLUtil::checkGLErrors();
 }
 
-void drawTriangle()
+void drawTriangle(glm::mat4& mat)
 {
+   // BUG: THERE IS AN OPENGL GL_ERROR 1282 if glEnableVertexAttribArray is
+   // called in this function
+
    // bind the program (the shaders)
     glUseProgram(shaderProgram1);
+
+    //std::cout << "setting uniform = " << modelViewSlot << std::endl; std::cout.flush();
+    glUniformMatrix4fv(modelViewSlot, 1, 0, &mat[0][0]);
+    //GLUtil::checkGLErrors();
 
     // bind the VAO (the triangle)
     glBindVertexArray(gVAO);
 
+
     // draw the VAO
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(triangle)/sizeof(Triangle));
+
 
     // unbind the VAO
     glBindVertexArray(0);
 
+
     // unbind the program
     glUseProgram(0);
+
+    GLUtil::checkGLErrors();
 }
 
 int main(void)
@@ -148,15 +183,16 @@ int main(void)
 
   glm::mat4 identityMatrix = glm::mat4(1.0);//Identity matrix
 
+  glEnableVertexAttribArray(vertSlot);
+  glEnableVertexAttribArray(colorSlot);
+
   while (!glfwWindowShouldClose(window))
   {
     sizeViewport(window);
-    //glMatrixMode(GL_MODELVIEW);
     glm::mat4 rotMat = glm::rotate(identityMatrix,(float) glfwGetTime() * 50.f,
                                    glm::vec3(0.f,0.f,1.f));
-    //glLoadMatrixf(&rotMat[0][0]);
 
-    drawTriangle();
+    drawTriangle(rotMat);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
