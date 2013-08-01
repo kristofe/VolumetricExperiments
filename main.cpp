@@ -12,6 +12,7 @@
 #include "GLFW/glfw3.h" // - lib is in /usr/local/lib/libglfw3.a
 #include "test.h"
 #include "glutil.h"
+#include "glprogram.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -37,10 +38,10 @@ GLubyte indices[3] = {
 
 GLuint gVAO = 0;
 GLuint gVBO = 0;
-GLint  shaderProgram1 = 0;
-GLint  vertSlot = 0;
-GLint  colorSlot = 0;
-GLint  modelViewSlot = 0;
+GLProgram program1;
+//GLint  vertSlot = 0;
+//GLint  colorSlot = 0;
+//GLint  modelViewSlot = 0;
 
 /////
 
@@ -76,10 +77,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
-void loadAndLinkShaders(){
-      shaderProgram1 = GLUtil::loadShaders("../vertShader.glsl","../fragShader.glsl","");
-}
-
 
 void loadTriangle()
 {
@@ -101,7 +98,7 @@ void loadTriangle()
    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
    // connect the xyz to the "vert" attribute of the vertex shader
-   vertSlot = glGetAttribLocation(shaderProgram1,"vert");
+   GLint vertSlot = program1.getAttributeLocation("vert");
    glEnableVertexAttribArray(vertSlot);
    glVertexAttribPointer(vertSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Triangle),
                          BUFFER_OFFSET(0));
@@ -109,7 +106,7 @@ void loadTriangle()
    std::cout << "Setup Vert Slot = " << vertSlot << std::endl; std::cout.flush();
    GLUtil::checkGLErrors();
 
-   colorSlot = glGetAttribLocation(shaderProgram1,"color");
+   GLint colorSlot = program1.getAttributeLocation("color");
    std::cout << "Color Slot = " << colorSlot << std::endl; std::cout.flush();
    glEnableVertexAttribArray(colorSlot);
    glVertexAttribPointer(colorSlot, 3, GL_FLOAT, GL_FALSE, sizeof(Triangle),
@@ -119,7 +116,7 @@ void loadTriangle()
    GLUtil::checkGLErrors();
 
 
-   modelViewSlot = glGetUniformLocation(shaderProgram1, "modelview");
+   GLint modelViewSlot = program1.getUniformLocation("modelview");
    std::cout << "Setup modelViewl Uniform Slot = " << modelViewSlot << std::endl; std::cout.flush();
    std::cout << "Done setting up triangle" << std::endl; std::cout.flush();
 
@@ -135,10 +132,10 @@ void drawTriangle(glm::mat4& mat)
    // called in this function
 
    // bind the program (the shaders)
-    glUseProgram(shaderProgram1);
+    glUseProgram(program1.getID());
 
     //std::cout << "setting uniform = " << modelViewSlot << std::endl; std::cout.flush();
-    glUniformMatrix4fv(modelViewSlot, 1, 0, &mat[0][0]);
+    glUniformMatrix4fv(program1.getUniformLocation("modelview"), 1, 0, &mat[0][0]);
     //GLUtil::checkGLErrors();
 
     // bind the VAO (the triangle)
@@ -178,13 +175,12 @@ int main(void)
   glfwSetKeyCallback(window, key_callback);
 
   std::cout << GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
-  loadAndLinkShaders();
+  program1.loadShaders("../vertShader.glsl","../fragShader.glsl","");
   loadTriangle();
 
   glm::mat4 identityMatrix = glm::mat4(1.0);//Identity matrix
 
-  glEnableVertexAttribArray(vertSlot);
-  glEnableVertexAttribArray(colorSlot);
+  program1.enableVertexAttributes();
 
   while (!glfwWindowShouldClose(window))
   {
