@@ -18,8 +18,6 @@
 
 using namespace kdslib;
 
-#define BUFFER_OFFSET(i) ((void*)(i))
-
 
 //TODO: Move this kind of stuff into a renderer
 typedef struct {
@@ -39,9 +37,6 @@ GLubyte indices[3] = {
 GLuint gVAO = 0;
 GLuint gVBO = 0;
 GLProgram program1;
-//GLint  vertSlot = 0;
-//GLint  colorSlot = 0;
-//GLint  modelViewSlot = 0;
 
 /////
 
@@ -163,7 +158,7 @@ int main(void)
   glfwSetErrorCallback(error_callback);
   if (!glfwInit())
     exit(EXIT_FAILURE);
-  
+
   hintOpenGL32CoreProfile();
   window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
   if (!window)
