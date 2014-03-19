@@ -170,7 +170,7 @@ int main(void)
   glfwSetKeyCallback(window, key_callback);
 
   std::cout << GLUtil::getOpenGLInfo() << std::endl;std::cout.flush();
-  program1.loadShaders("../vertShader.glsl","../fragShader.glsl","");
+  program1.loadShaders("vertShader.glsl","fragShader.glsl","");
   loadTriangle();
 
   glm::mat4 identityMatrix = glm::mat4(1.0);//Identity matrix

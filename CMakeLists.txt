@@ -29,7 +29,8 @@ endif(CMAKE_BUILD_TYPE MATCHES DEBUG)
 
 
 set(KDSLIB_PATH "/Users/kristofe/Documents/Projects/KDSLib/")
-set(KDSLIB_BUILD_PATH ${KDSLIB_PATH}build)
+set(GLFWLIB_PATH "/Users/kristofe/Documents/Projects/glfw-3.0.1/CMake/src/")
+set(KDSLIB_BUILD_PATH ${KDSLIB_PATH})
 set(KDSLIB_INCLUDE_PATH ${KDSLIB_PATH}include)
 set(GLM_INCLUDE_PATH ${KDSLIB_PATH})
 
@@ -37,7 +38,7 @@ set(GLM_INCLUDE_PATH ${KDSLIB_PATH})
 
 #add_subdirectory(${KDSLIB_PATH} ${KDSLIB_BUILD_PATH})
 include_directories(${KDSLIB_INCLUDE_PATH} ${GLM_INCLUDE_PATH})
-link_directories(${KDSLIB_BUILD_PATH})
+link_directories(${KDSLIB_BUILD_PATH} ${GLFWLIB_PATH})
 
 if(APPLE)
    FIND_LIBRARY(IOKIT_LIBRARY IOKit)

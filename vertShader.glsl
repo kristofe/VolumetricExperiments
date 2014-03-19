@@ -11,3 +11,4 @@ void main() {
     //gl_Color = vec4(color,1);
     incolor = vec4(color,1);
 }
+

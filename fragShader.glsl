@@ -8,3 +8,4 @@ void main() {
     //finalColor = vec4(1.0, 1.0, 1.0, 1.0);
     finalColor = incolor;
 }
+
